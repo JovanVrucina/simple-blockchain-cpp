@@ -64,13 +64,37 @@ void newTx(TxData *_mempool, unsigned short *_txNum);
 
 /********************************************BLOCK CLASS MEMBERS*********************************************************************/
 int main(void){
-
-	Blockchain vrucinaChain;
+	//Starting kureChain by initialising a new instance of a blockchain
+	system("clear");
+	cout<<"Starting..."<<endl;
+	Blockchain kureChain;
 	TxData mempool[16];
+	unsigned short txNum = 0;
+	char choice = '\0';
 
-	
+	cout<<"Welcome"<<endl;
 
-	return EXIT_SUCCESS;	
+	while (true)
+	{
+		cout<<"\nMenu:\n0-Exit\t1-New Tx\t2-Write Tx to chain"<<endl;
+		cin>>choice;
+
+		switch(choice){
+			case '0':
+				return EXIT_SUCCESS;
+				break;
+			case '1':
+				newTx(mempool, &txNum);
+				break;
+			case '2':
+				kureChain.addBlock(mempool, txNum);
+				break;
+			default:
+				system("clear");
+				cout<<"Invalid input, try again!"<<endl;
+				break;
+		}
+	}
 }
 
 /*************************************FUNCTIONS****************************************************************/
