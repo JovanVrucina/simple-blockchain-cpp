@@ -3,31 +3,36 @@
 #include<ctime>
 #include<vector>
 using namespace std;
-//classes definiton
 
+/*************************************CLASSES DECLARATION******************************************************/
 //transaction data (struct)
 class TxData{
 	public:
 		string from;
 		string to;
-		string msg; //transaction message could be anything form hello world to functoin args(future implementation)
+		string msg; //transaction message could be anything form hello world to functoin args(future implementations)
 		double amount;
 		time_t timestamp;
+		//double gas (future implementation)
 };
 
 //block class
 class Block{
+
+
 	private:
+		friend class Blockchain;
 		unsigned int index;
+		unsigned int TxNum; //number of Tx in the block
+		unsigned int nonce; //nonce for checking the validity of Tx
 		size_t blockHash;
 		size_t prevHash;
 		size_t validateHash(); //proof-of-work hash generation
-		unsigned int nonce; //nonce for checking the validity of Tx
-		
+		Block(int idx, TxData transacData[16], size_t _prevHash, int txNum);
 	
 	public:
 		//constructor
-			Block(int idx, TxData transacData, size_t _prevHash);
+		//	Block(int idx, TxData transacData[16], size_t _prevHash, int txNum);
 
 			size_t getHash(); //hash getter function
 			size_t generateHash(int nonce); //generating a hash with nonce for validity purposes
@@ -35,46 +40,72 @@ class Block{
 			int getIndex(); //getter for index
 			int getNonce(); //getter for nonce
 
-			TxData data; //Transaction data for a single transaction
+			TxData *data; //transaction array for a single block (max 16 tx)
+
 			bool isHashValid(); //function to check validity of the block
 };
 
 class Blockchain{
 	private:
-		Block static createGenesis(); //creating a genesis block
+		Block createGenesis(); //creating a genesis block
 
 	public:
 		vector<Block> chain; //chain of blocks - vector 
 
-		Blockchain(); //constructor for the blockchain (calls createGenesis();)
+		Blockchain(); //constructor for the blockchain (calls createGenesis(); which calls addBlock();)
 
-		void addBlock(TxData transacData); //function for adding a block to the blockchain
+		void addBlock(TxData transacData[16], unsigned int txNum); //function for adding a block to the blockchain
 		bool isValid(); //function for checking the validity of the whole blockchain
 
-		Block *getLatestBlock(); //FOR DEMO PURPOSES ONLY! GETTING THE POINTER TO THE LATEST BLOCK TO DEMONSTRATE AN ATTACK ON THE NETWORK
+		Block *getLatestBlock(); //FOR DEMO PURPOSES ONLY!!!!! GETTING THE POINTER TO THE LATEST BLOCK TO DEMONSTRATE AN ATTACK ON THE NETWORK
 };
 
-//MAIN CODE
+void newTx(TxData *_mempool, unsigned short *_txNum);
+
+/********************************************BLOCK CLASS MEMBERS*********************************************************************/
 int main(void){
-	Blockchain vrucinaCoin;
 
-	TxData testTx;
-	testTx.amount = 420;
-	testTx.from = "Kid A";
-	testTx.to = "Saul Goodman";
-	testTx.msg = "Hello World!";
+	Blockchain vrucinaChain;
+	TxData mempool[16];
 
-	cout<<"Trasnasction successful!\nNonce: "<<vrucinaCoin.chain.back().getNonce()<<"\nHash: "<<vrucinaCoin.chain.back().getHash()<<endl;
+	
 
-	return 0;
+	return EXIT_SUCCESS;	
 }
 
 /*************************************FUNCTIONS****************************************************************/
+void newTx(TxData *_mempool, unsigned short *_txNum){
+	system("clear");
+	if(*_txNum>=16){
+		cout<<"Mempool full, please write Txs to chain"<<endl;
+		return;
+	}
+
+	cout<<"From: ";
+	cin>>_mempool[*_txNum].from;
+	cout<<"To: ";
+	cin>>_mempool[*_txNum].to;
+	cout<<"Amount: ";
+	cin>>_mempool[*_txNum].amount;
+	cout<<"Transaction message: ";
+	cin>>_mempool[*_txNum].msg;
+
+	(*_txNum)++;
+}
+
+/*************************************CLASS MEMBER FUNCTIONS***************************************************/
+
 /*************************************BLOCK CLASS MEMBERS******************************************************/
-//FUNCTIONS OF ALL CLASS MEMBERS EXPLAINED IN
-Block::Block(int idx, TxData transacData, size_t _prevHash){
+Block::Block(int idx, TxData transacData[16], size_t _prevHash, int txNum){
 	index = idx;
-	data = transacData;
+	TxNum = txNum;
+
+	data = new TxData[TxNum];
+	for(int i=0; i<TxNum; i++){
+		data[i] = transacData[i];
+		data[i].timestamp = time(NULL);
+	}
+
 	prevHash = _prevHash;
 	blockHash = validateHash();
 }
@@ -84,7 +115,7 @@ size_t Block::validateHash(){
 	size_t fHash;
 	do{	
 		fHash = generateHash(nonce++);
-	}while(fHash/1000000000000!=0); //Automatic difficulty to be added
+	}while(fHash/100000000000000!=0);
 
 	nonce--;
 	return fHash;
@@ -94,9 +125,17 @@ size_t Block::validateHash(){
 size_t Block::generateHash(int _nonce){
 	hash<string> hash1;
 	hash<size_t> finalHash;
-	string toHash = to_string(data.amount) + data.to + data.from + to_string(data.timestamp)+to_string(_nonce); 
+
+	//initialising hash
+	string toHash = "\0";
+	for(int i=0; i<TxNum;i++){
+		string bufferHash = to_string(data[i].amount)+data[i].from+data[i].to+to_string(data[i].timestamp)+data[i].msg;
+		toHash += bufferHash;
+	}
+	toHash += to_string(_nonce);
 
 	return finalHash(hash1(toHash)+prevHash);
+
 }
 
 //block hash getter function
@@ -124,9 +163,7 @@ bool Block::isHashValid(){
 
 
 
-
-//BLOCKCHAIN CLASS MEMBERS
-//Blockchain constructor
+/*************************************BLOCKCHAIN CLASS MEMBERS******************************************************/
 
 Blockchain::Blockchain(){
 		Block genesis = createGenesis();
@@ -135,15 +172,15 @@ Blockchain::Blockchain(){
 
 //function that creates genesis block
 Block Blockchain::createGenesis(){
-	TxData dat;
-	dat.amount = 0;
-	dat.from = "NIL";
-	dat.to = "NIL";
-	dat.msg = "NULL";
-	dat.timestamp = time(NULL);
+	TxData dat[1];
+	dat[0].amount = 0;
+	dat[0].from = "NIL";
+	dat[0].to = "NIL";
+	dat[0].msg = "NULL";
+	dat[0].timestamp = time(NULL);
 
 	hash<int> hash1;
-	Block genesis(0, dat, hash1(0));
+	Block genesis(0,dat, hash1(0), 1);
 
 	return genesis;
 }
@@ -153,10 +190,13 @@ Block *Blockchain::getLatestBlock(){
 	return &chain.back();
 }
 
-void Blockchain::addBlock(TxData transacData){
+void Blockchain::addBlock(TxData transacData[16], unsigned int txNum){
 	int index = chain.size();
-	transacData.timestamp = time(NULL);
-	Block newBlock(index, transacData, chain.back().getHash());
+
+	for(int i=0; i<txNum; i++){
+		transacData[i].timestamp = time(NULL);
+	}
+	Block newBlock(index, transacData, chain.back().getHash(), txNum);
 	chain.push_back(newBlock);
 }
 
