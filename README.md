@@ -7,3 +7,4 @@ The main() only contains a test transaction, feel free to play around with the c
 
 In the next update, there should be some imrpovement in UI.
 Some code cleanup may be done.
+Other features may be coming soon
