@@ -5,6 +5,5 @@ Forked the basic blockchain from Dev Tech Guy on YouTube (https://www.youtube.co
 
 The main() only contains a test transaction, feel free to play around with the code.
 
-In the next update, there should be some imrpovement in UI.
-Some code cleanup may be done.
-Other features may be coming soon
+#What's new
+	Cleaned up the code a bit. Added header files. Minor bug fixes.
