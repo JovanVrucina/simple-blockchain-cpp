@@ -4,22 +4,22 @@
 using namespace std;
 
 int main(void){
-	cout<<"Probably initialising and validating the genesis block"<<endl;
+	cout<<"Initialising and validating the genesis block"<<endl;
 
 	Blockchain vrucinaChain;
 	TxData mempool[16];
 
-	mempool[0].amount = 6.9;
-	mempool[0].from = "Vitalik Buterin";
-	mempool[0].to = "JovanVrucina";
-	mempool[0].msg = "This code could use some cleanup";
+	mempool[0].amount = 500;
+	mempool[0].from = "Test1";
+	mempool[0].to = "Test2";
+	mempool[0].msg = "Hello, World!";
 
-	mempool[1].amount = 4.2;
-	mempool[1].from = "JovanVrucina";
-	mempool[1].to = "Vitalik Buterin";
-	mempool[1].msg = "I know";
+	mempool[1].amount = 256;
+	mempool[1].from = "Test2";
+	mempool[1].to = "Test1";
+	mempool[1].msg = "r";
 
-	cout<<"Okay, now it's validating the first block"<<endl;
+	cout<<"Validating the first block"<<endl;
 	vrucinaChain.addBlock(mempool, 2);
 
 	for(int i=0; i<2; i++)
