@@ -5,4 +5,5 @@ Forked the basic blockchain from Dev Tech Guy on YouTube (https://www.youtube.co
 
 The main() only contains a test transaction, feel free to play around with the code.
 
-Update currently in progress. Added a header file and using a safer data structure for transaction data on the Block class.
+#What's new
+	Cleaned up the code a bit. Added header files. Minor bug fixes.
